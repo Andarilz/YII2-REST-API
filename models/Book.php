@@ -18,6 +18,18 @@ use Yii;
 class Book extends \yii\db\ActiveRecord
 {
     /**
+     * Returns a query for retrieving author related to the current book.
+     *
+     *  This method establishes a 'hasOne' relationship between the Book and Author models,
+     * linking them via the 'author_id' attribute of the Book model and the 'id' attribute of the Author model.
+     * @return \yii\db\ActiveQuery
+     */
+    public function getAuthor()
+    {
+        return $this->hasOne(Author::class, ['id' => 'author_id']);
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()

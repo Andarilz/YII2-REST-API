@@ -14,6 +14,17 @@ use Yii;
  */
 class Author extends \yii\db\ActiveRecord
 {
+    /**
+     * Returns a query for retrieving books related to the current author.
+     *
+     *  This method establishes hasMany relationship between the Author and Book models
+     *  linking them via the author_id attribute of the Book model and the id attribute of the Author model
+     * @return \yii\db\ActiveQuery
+     */
+    public function getBooks()
+    {
+        return $this->hasMany(Book::class, ['author_id' => 'id']);
+    }
 
     /**
      * {@inheritdoc}

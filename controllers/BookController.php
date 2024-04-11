@@ -110,14 +110,14 @@ class BookController extends Controller
     }
 
     /**
-     * Find a Book model based on the primary key value
+     * Find a Book model based on the primary key value with related Author model
      * If the model is not found, a 404 HTTP exception will be thrown
      * @param $id
      * @return array|\yii\console\Response|\yii\db\ActiveRecord|\yii\web\Response
      */
     protected function findBook($id)
     {
-        $book = Book::find()->where(['id' => $id])->one();
+        $book = Book::find()->where(['id' => $id])->with('author')->one();
 
         if($book !== null){
             return $book;
