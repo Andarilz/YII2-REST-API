@@ -107,7 +107,7 @@ class BookController extends Controller
     {
         $book = $this->findBook($id);
         $book->delete();
-        \Yii::$app->getResponse()->setStatusCode(204);
+        \Yii::$app->getResponse()->setStatusCode(204, "Book was deleted successfully!");
     }
 
     /**
