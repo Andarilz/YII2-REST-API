@@ -52,7 +52,8 @@ $config = [
             'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
-                ['class' => 'yii\rest\UrlRule', 'controller' => 'book']
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'book'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'author'],
             ],
         ],
 
