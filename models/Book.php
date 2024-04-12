@@ -30,6 +30,30 @@ class Book extends \yii\db\ActiveRecord
     }
 
     /**
+     * Search method filters the books query according to title\description or author_id
+     * @param string|null $search Title or Description to search for
+     * @param array|null $authors Array of authors ID's to filtering
+     * @return \yii\db\ActiveQuery
+     */
+    public static function search($search, $authors)
+    {
+        $query = static::find();
+        if ($search !== null) {
+            $query->andFilterWhere(['or',
+                ['like', 'title', $search],
+                ['like', 'description', $search]
+            ]);
+        }
+        if ($authors !== null) {
+            if (is_array($authors)) {
+                $query->andFilterWhere(['in', 'author_id', $authors]);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
      * {@inheritdoc}
      */
     public static function tableName()

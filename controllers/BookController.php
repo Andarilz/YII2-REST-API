@@ -32,21 +32,9 @@ class BookController extends Controller
     public function actionIndex($search = null)
     {
         $authors = \Yii::$app->request->getQueryParam('author');
-        $query = Book::find();
-        if ($search !== null) {
-            $query->andFilterWhere(['or',
-                ['like', 'title', $search],
-                ['like', 'description', $search]
-            ]);
-        }
-        if ($authors !== null) {
-            if (is_array($authors)) {
-                    $query->andFilterWhere(['in', 'author_id', $authors]);
-            }
-        }
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
+            'query' => Book::search($search, $authors),
         ]);
 
         return $dataProvider;
