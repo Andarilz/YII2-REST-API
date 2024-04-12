@@ -3,8 +3,11 @@
 namespace app\controllers;
 
 use app\models\Book;
+use app\resources\BookResource;
+use app\services\BookService;
 use yii\data\ActiveDataProvider;
 use yii\data\DataFilter;
+use yii\db\Exception;
 use yii\rest\Controller;
 use yii\web\HttpException;
 use yii\web\NotFoundHttpException;
@@ -28,6 +31,7 @@ class BookController extends Controller
     /**
      * Display a list of books
      * @param null $search
+     * @return array
      */
     public function actionIndex($search = null)
     {
@@ -37,18 +41,30 @@ class BookController extends Controller
             'query' => Book::search($search, $authors),
         ]);
 
-        return $dataProvider;
+        $prepared_books = $dataProvider->getModels();
+
+        $resources = BookService::getPreparedBooksResources($prepared_books);
+
+        return $resources;
     }
 
     /**
      * Display information about the specific book
      * @param $id
-     * @return array|\yii\console\Response|\yii\db\ActiveRecord|\yii\web\Response
+     * @return BookResource
      */
-    public function actionView($id)
-    {
-        return $this->findBook($id);
-    }
+//    public function actionView($id)
+//    {
+//        $book = $this->findBook($id);
+//
+//        if($book instanceof Book) {
+//            $resource = BookService::getPreparedBookResource($book);
+//        } else {
+//            throw new HttpException(500);
+//        }
+//
+//        return $resource;
+//    }
 
     /**
      * Create new book
