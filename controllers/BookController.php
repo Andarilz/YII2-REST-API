@@ -126,7 +126,7 @@ class BookController extends Controller
         if($book !== null){
             return $book;
         } else {
-           return \Yii::$app->getResponse()->setStatusCode(404);
+           throw new HttpException(404);
         }
     }
 
