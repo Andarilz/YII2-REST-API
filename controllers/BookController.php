@@ -6,11 +6,8 @@ use app\models\Book;
 use app\resources\BookResource;
 use app\services\BookService;
 use yii\data\ActiveDataProvider;
-use yii\data\DataFilter;
-use yii\db\Exception;
 use yii\rest\Controller;
 use yii\web\HttpException;
-use yii\web\NotFoundHttpException;
 
 /**
 * BookController manages CRUD-operations for the Book model
@@ -68,7 +65,7 @@ class BookController extends Controller
 
     /**
      * Create new book
-     * @return Book|array
+     * @return BookResource|array
      * @throws \yii\base\InvalidConfigException
      */
     public function actionCreate()
@@ -77,7 +74,7 @@ class BookController extends Controller
 
         $book->load(\Yii::$app->getRequest()->getBodyParams(), '');
         if ($book->save()) {
-            return $book;
+            return BookService::getPreparedBookResource($book);
         } else {
             return ['errors' => $book->errors];
         }
@@ -86,7 +83,7 @@ class BookController extends Controller
     /**
      * Update on existing book
      * @param $id
-     * @return array|\yii\console\Response|\yii\db\ActiveRecord|\yii\web\Response
+     * @return array|BookResource
      * @throws \yii\base\InvalidConfigException
      */
     public function actionUpdate($id)
@@ -94,7 +91,7 @@ class BookController extends Controller
         $book = $this->findBook($id);
         $book->load(\Yii::$app->getRequest()->getBodyParams(), '');
         if ($book->save()) {
-            return $book;
+            return BookService::getPreparedBookResource($book);
         } else {
             return ['errors' => $book->errors];
         }
