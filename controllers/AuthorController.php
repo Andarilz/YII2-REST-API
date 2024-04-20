@@ -57,6 +57,9 @@ class AuthorController extends Controller
         $author = new Author();
 
         $author->load(\Yii::$app->getRequest()->getBodyParams(), '');
+
+        $author->name = strtolower($author->name);
+
         if ($author->save()) {
             return $author;
         } else {

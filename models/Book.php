@@ -37,11 +37,13 @@ class Book extends \yii\db\ActiveRecord
      */
     public static function search($search, $authors)
     {
-        $query = static::find();
+        $query = static::find()->joinWith('author')->orderBy(['id' => SORT_ASC]);
+
         if ($search !== null) {
             $query->andFilterWhere(['or',
-                ['like', 'title', $search],
-                ['like', 'description', $search]
+                ['like', 'title', strtolower($search)],
+                ['like', 'description', $search],
+                ['like', 'authors.name', strtolower($search)]
             ]);
         }
         if ($authors !== null) {

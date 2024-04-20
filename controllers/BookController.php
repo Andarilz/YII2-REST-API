@@ -73,6 +73,7 @@ class BookController extends Controller
         $book = new Book();
 
         $book->load(\Yii::$app->getRequest()->getBodyParams(), '');
+        $book->title = strtolower($book->title);
         if ($book->save()) {
             return BookService::getPreparedBookResource($book);
         } else {
