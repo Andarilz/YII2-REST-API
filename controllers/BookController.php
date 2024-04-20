@@ -32,17 +32,16 @@ class BookController extends Controller
      */
     public function actionIndex($search = null)
     {
-        $authors = \Yii::$app->request->getQueryParam('author');
+        $query = \Yii::$app->db->createCommand(
+            'SELECT * FROM books LEFT JOIN authors ON books.author_id = authors.id 
+                WHERE LOWER(authors.name) LIKE :author
+                OR title like :title
+                OR description like :description'
+        )->bindValues(['author' => '%' . strtolower($search) . '%', 'title' => '%' . strtolower($search) . '%', 'description' => '%' . $search . '%'])->queryAll();
 
-        $dataProvider = new ActiveDataProvider([
-            'query' => Book::search($search, $authors),
-        ]);
+        $books = BookService::prepareAttributes($query);
 
-        $prepared_books = $dataProvider->getModels();
-
-        $resources = BookService::getPreparedBooksResources($prepared_books);
-
-        return $resources;
+        return BookService::getPreparedBooksResources($books);
     }
 
     /**
@@ -70,14 +69,31 @@ class BookController extends Controller
      */
     public function actionCreate()
     {
-        $book = new Book();
+        $bodyParams = \Yii::$app->getRequest()->getBodyParams(); //получаем параметры ввода
 
-        $book->load(\Yii::$app->getRequest()->getBodyParams(), '');
-        $book->title = strtolower($book->title);
-        if ($book->save()) {
+        $command = \Yii::$app->db->createCommand("
+        INSERT INTO books (author_id, title, pages, language, genre, description)
+        VALUES (:author_id, :title, :pages, :language, :genre, :description)
+        ")->bindValues([
+            ':author_id' => $bodyParams['author_id'],
+            ':title' => $bodyParams['title'],
+            ':pages' => $bodyParams['pages'],
+            ':language' => $bodyParams['language'],
+            ':genre' => $bodyParams['genre'],
+            ':description' => $bodyParams['description']
+        ])->execute(); //вызываем SQL-запрос на создание записи
+
+        if ($command) { //если запись создана успешно
+            $id = \Yii::$app->db->createCommand("SELECT id FROM books ORDER BY id DESC LIMIT 1")->execute(); //получаем id последней записи
+
+            $query = \Yii::$app->db->createCommand("SELECT * FROM books WHERE id = :id")->bindValue(':id', $id)->queryOne(); //получаем созданную книгу
+
+            $book = BookService::prepareAttribute($query);
+
             return BookService::getPreparedBookResource($book);
+
         } else {
-            return ['errors' => $book->errors];
+            return ['error' => 'Failed to create a book'];
         }
     }
 
@@ -119,7 +135,12 @@ class BookController extends Controller
      */
     protected function findBook($id)
     {
-        $book = Book::find()->where(['id' => $id])->with('author')->one();
+//        $book = Book::find()->where(['id' => $id])->with('author')->one();
+
+        $book = \Yii::$app->db->createCommand(
+            "SELECT * FROM books 
+                LEFT JOIN authors ON books.author_id = authors.id 
+                WHERE books.id = :id")->bindValue('id', $id)->queryOne();
 
         if($book !== null){
             return $book;

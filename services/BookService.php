@@ -5,6 +5,7 @@ namespace app\services;
 
 use app\models\Book;
 use app\resources\BookResource;
+use yii\base\BaseObject;
 
 /**
  * BookService have methods for prepared book resources to add author field
@@ -42,5 +43,24 @@ class BookService
         $resource->genre = $book->genre;
         $resource->setAuthor($book->author);
         return $resource;
+    }
+
+    public static function prepareAttributes($query)
+    {
+        $books = [];
+        foreach ($query as $query_book) {
+            $book = self::prepareAttribute($query_book);
+            $books[] = $book;
+        }
+        return $books;
+    }
+
+    public static function prepareAttribute($query)
+    {
+        $book = new Book();
+        $book->id = $query['id'];
+        $book->setAttributes($query);
+
+        return $book;
     }
 }
