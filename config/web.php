@@ -13,6 +13,15 @@ $config = [
     ],
     'defaultRoute' => 'books',
     'components' => [
+        'response' => [
+            'class' => 'yii\web\Response',
+            'on beforeSend' => function ($event) {
+                // Allow CORS requests
+                $event->sender->headers->set('Access-Control-Allow-Origin', '*');
+                $event->sender->headers->set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+                $event->sender->headers->set('Access-Control-Allow-Headers', 'Content-Type');
+            },
+        ],
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'dX22Ofi_0c9C68zqsQ1qEDtwPIW7BpSY',
@@ -54,6 +63,11 @@ $config = [
             'rules' => [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'book'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'author'],
+                [
+                    'pattern' => '<controller>/<action>',
+                    'verb' => 'OPTIONS',
+                    'route' => '<controller>/options',
+                ],
             ],
         ],
 

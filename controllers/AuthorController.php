@@ -14,16 +14,50 @@ use yii\web\HttpException;
 class AuthorController extends Controller
 {
 
+    public function actions()
+    {
+        return [
+            'options' => [
+                'class' => 'yii\rest\OptionsAction',
+            ],
+        ];
+    }
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::class,
+            'cors' => [
+                // restrict access to
+                'Origin' => ['http://vue.home'],
+                // Allow only POST and PUT methods
+                'Access-Control-Request-Methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                // Allow only headers 'X-Wsse'
+                'Access-Control-Request-Headers' => ['Content-Type'],
+                // Allow credentials (cookies, authorization headers, etc.) to be exposed to the browser
+                'Access-Control-Allow-Credentials' => true,
+                // Allow OPTIONS caching
+                'Access-Control-Max-Age' => 3600,
+                // Allow the X-Pagination-Current-Page header to be exposed to the browser.
+                'Access-Control-Expose-Headers' => ['X-Pagination-Current-Page'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
     /**
      * Overwrite list of default html-actions for REST API
      * @return array
      */
-    public function actions()
-    {
-        $actions = parent::actions();
-        unset($actions['index'], $actions['view'], $actions['create'], $actions['update'], $actions['delete']);
-        return $actions;
-    }
+//    public function actions()
+//    {
+//        $actions = parent::actions();
+//        unset($actions['index'], $actions['view'], $actions['create'], $actions['update'], $actions['delete']);
+//        return $actions;
+//    }
 
     /**
      * Display list of authors
