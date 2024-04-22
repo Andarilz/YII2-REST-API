@@ -42,10 +42,10 @@ class AuthorController extends Controller
      * @param $id
      * @return array|\yii\console\Response|\yii\db\ActiveRecord|\yii\web\Response
      */
-//    public function actionView($id)
-//    {
-//        return $this->findAuthor($id);
-//    }
+    public function actionView($id)
+    {
+        return $this->findAuthor($id);
+    }
 
     /**
      * Create new author

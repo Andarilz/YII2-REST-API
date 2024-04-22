@@ -45,22 +45,4 @@ class BookService
         return $resource;
     }
 
-    public static function prepareAttributes($query)
-    {
-        $books = [];
-        foreach ($query as $query_book) {
-            $book = self::prepareAttribute($query_book);
-            $books[] = $book;
-        }
-        return $books;
-    }
-
-    public static function prepareAttribute($query)
-    {
-        $book = new Book();
-        $book->id = $query['id'];
-        $book->setAttributes($query);
-
-        return $book;
-    }
 }
