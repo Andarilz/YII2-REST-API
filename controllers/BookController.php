@@ -76,16 +76,38 @@ class BookController extends Controller
      */
     public function actionIndex($search = null)
     {
-        $books = \Yii::$app->db->createCommand(
-            'SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
-            FROM books
-            JOIN authors ON books.author_id = authors.id
-            WHERE LOWER(authors.name) LIKE :author
-                OR title like :title
-                OR description like :description'
-        )->bindValues(['author' => '%' . strtolower($search) . '%', 'title' => '%' . strtolower($search) . '%', 'description' => '%' . $search . '%'])->queryAll();
+        $authors = \Yii::$app->request->getQueryParam('authors');
 
-        return $books;
+        $languages = \Yii::$app->request->getQueryParam('languages');
+
+        $genre = \Yii::$app->request->getQueryParam('genre');
+
+        $min = \Yii::$app->request->getQueryParam('min');
+
+        $max = \Yii::$app->request->getQueryParam('max');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => Book::search($search, $authors, $languages, $genre, $min, $max),
+        ]);
+
+        $prepared_books = $dataProvider->getModels();
+
+        $resources = BookService::getPreparedBooksResources($prepared_books);
+
+        return $resources;
+
+//        $authors = explode(',', $authors);
+//
+//        $books = \Yii::$app->db->createCommand(
+//            'SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
+//            FROM books
+//            JOIN authors ON books.author_id = authors.id
+//            WHERE LOWER(authors.name) LIKE :author
+//                AND title LIKE :title
+//                AND description LIKE :description'
+//        )->bindValues(['author' => '%' . $authors . '%', 'title' => '%' . strtolower($search) . '%', 'description' => '%' . $search . '%'])->queryAll();
+//
+//        return $books;
 
     }
 
@@ -177,6 +199,11 @@ class BookController extends Controller
     public function actionLanguage()
     {
         return \Yii::$app->db->createCommand('SELECT DISTINCT language FROM books')->queryAll();
+    }
+
+    public function actionGenre()
+    {
+        return \Yii::$app->db->createCommand('SELECT DISTINCT genre FROM books')->queryAll();
     }
 
 }

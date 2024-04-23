@@ -67,7 +67,8 @@ $config = [
                     'class' => 'yii\rest\UrlRule',
                     'controller' => 'book', // Указываем контроллер
                     'extraPatterns' => [
-                        'GET language' => 'language', // Добавляем новый маршрут для действия bookLanguageAction
+                        'GET language' => 'language',
+                        'GET genre' => 'genre'
                     ],
                 ],
                 [
