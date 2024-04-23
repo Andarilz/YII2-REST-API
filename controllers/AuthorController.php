@@ -4,6 +4,7 @@
 namespace app\controllers;
 
 use app\models\Author;
+use app\services\AuthorService;
 use yii\rest\Controller;
 use yii\web\HttpException;
 
@@ -68,17 +69,21 @@ class AuthorController extends Controller
     {
         $authors = Author::find()->all();
 
-        return $authors;
+        return AuthorService::getPreparedAuthorsResources($authors);
     }
 
     /**
      * Display information about specific author
      * @param $id
-     * @return array|\yii\console\Response|\yii\db\ActiveRecord|\yii\web\Response
+     * @return \app\resources\AuthorResource
+     * @throws HttpException
      */
     public function actionView($id)
     {
-        return $this->findAuthor($id);
+        $author = $this->findAuthor($id);
+        if($author instanceof Author){
+            return AuthorService::getPreparedAuthorResource($author);
+        }
     }
 
     /**
@@ -111,7 +116,11 @@ class AuthorController extends Controller
     public function actionUpdate($id)
     {
         $author = $this->findAuthor($id);
+
         $author->load(\Yii::$app->getRequest()->getBodyParams(), '');
+
+        $author->name = strtolower($author->name);
+
         if ($author->save()) {
             return $author;
         } else {

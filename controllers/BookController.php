@@ -88,21 +88,27 @@ class BookController extends Controller
         return $books;
 
     }
+
     /**
      * Display information about the specific book
      * @param $id
-     * @return BookResource
+     * @return array|\yii\db\DataReader
+     * @throws HttpException
+     * @throws \yii\db\Exception
      */
     public function actionView($id)
     {
-        $book = $this->findBook($id);
+        $book = \Yii::$app->db->createCommand('
+        SELECT books.id, authors.name AS author_name, books.title, books.pages, books.language, books.genre, books.description
+        FROM books
+        JOIN authors ON books.author_id = authors.id
+        WHERE books.id = :id')->bindValue(':id', $id)->queryOne();
 
-        if($book instanceof Book) {
-            $resource = BookService::getPreparedBookResource($book);
+        if($book) {
+            return $book;
         } else {
-            throw new HttpException(500);
+            throw new HttpException(404);
         }
-        return $resource;
     }
 
     /**
