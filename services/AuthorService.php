@@ -39,7 +39,6 @@ class AuthorService
         $resource->name = $author->name;
         $resource->birth_year = $author->birth_year;
         $resource->country = $author->country;
-        $resource->books = $author->books;
         return $resource;
     }
 
