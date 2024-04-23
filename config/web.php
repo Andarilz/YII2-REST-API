@@ -64,6 +64,13 @@ $config = [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'book'],
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'author'],
                 [
+                    'class' => 'yii\rest\UrlRule',
+                    'controller' => 'book', // Указываем контроллер
+                    'extraPatterns' => [
+                        'GET language' => 'language', // Добавляем новый маршрут для действия bookLanguageAction
+                    ],
+                ],
+                [
                     'pattern' => '<controller>/<action>',
                     'verb' => 'OPTIONS',
                     'route' => '<controller>/options',

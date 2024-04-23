@@ -174,4 +174,9 @@ class BookController extends Controller
         }
     }
 
+    public function actionLanguage()
+    {
+        return \Yii::$app->db->createCommand('SELECT DISTINCT language FROM books')->queryAll();
+    }
+
 }
