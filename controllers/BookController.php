@@ -77,7 +77,7 @@ class BookController extends Controller
     public function actionIndex($search = null)
     {
         $books = \Yii::$app->db->createCommand(
-            'SELECT books.id, authors.name AS author_name, books.title, books.pages, books.language, books.genre, books.description
+            'SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
             FROM books
             JOIN authors ON books.author_id = authors.id
             WHERE LOWER(authors.name) LIKE :author
@@ -99,7 +99,7 @@ class BookController extends Controller
     public function actionView($id)
     {
         $book = \Yii::$app->db->createCommand('
-        SELECT books.id, authors.name AS author_name, books.title, books.pages, books.language, books.genre, books.description
+        SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
         FROM books
         JOIN authors ON books.author_id = authors.id
         WHERE books.id = :id')->bindValue(':id', $id)->queryOne();
