@@ -6,8 +6,11 @@ use app\models\Book;
 use app\resources\BookResource;
 use app\services\BookService;
 use yii\data\ActiveDataProvider;
+use yii\filters\AccessControl;
+use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\HttpException;
+use yii\web\Response;
 
 /**
 * BookController manages CRUD-operations for the Book model
@@ -18,11 +21,52 @@ class BookController extends Controller
      * Overwrite list of default html-actions for REST API
      * @return array
      */
+//    public function actions()
+//    {
+//        $actions = parent::actions();
+//        unset($actions['index'], $actions['view'], $actions['create'], $actions['update'], $actions['delete']);
+//        return $actions;
+//    }
+
     public function actions()
     {
-        $actions = parent::actions();
-        unset($actions['index'], $actions['view'], $actions['create'], $actions['update'], $actions['delete']);
-        return $actions;
+        return [
+            'options' => [
+                'class' => 'yii\rest\OptionsAction',
+            ],
+        ];
+    }
+
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+
+        $behaviors['corsFilter'] = [
+            'class' => \yii\filters\Cors::class,
+            'cors' => [
+                // restrict access to
+                'Origin' => ['http://vue.home'],
+                // Allow only POST and PUT methods
+                'Access-Control-Request-Methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'],
+                // Allow only headers 'X-Wsse'
+                'Access-Control-Request-Headers' => ['Content-Type'],
+                // Allow credentials (cookies, authorization headers, etc.) to be exposed to the browser
+                'Access-Control-Allow-Credentials' => true,
+                // Allow OPTIONS caching
+                'Access-Control-Max-Age' => 3600,
+                // Allow the X-Pagination-Current-Page header to be exposed to the browser.
+                'Access-Control-Expose-Headers' => ['X-Pagination-Current-Page'],
+            ],
+        ];
+
+        return $behaviors;
+    }
+
+    public function actionOptions()
+    {
+        \Yii::$app->response->statusCode = 200;
+        \Yii::$app->response->format = Response::FORMAT_JSON;
+        return ['status' => 'success'];
     }
 
     /**
@@ -32,10 +76,18 @@ class BookController extends Controller
      */
     public function actionIndex($search = null)
     {
-        $authors = \Yii::$app->request->getQueryParam('author');
+        $authors = \Yii::$app->request->getQueryParam('authors');
+
+        $languages = \Yii::$app->request->getQueryParam('languages');
+
+        $genre = \Yii::$app->request->getQueryParam('genre');
+
+        $min = \Yii::$app->request->getQueryParam('min');
+
+        $max = \Yii::$app->request->getQueryParam('max');
 
         $dataProvider = new ActiveDataProvider([
-            'query' => Book::search($search, $authors),
+            'query' => Book::search($search, $authors, $languages, $genre, $min, $max),
         ]);
 
         $prepared_books = $dataProvider->getModels();
@@ -43,25 +95,43 @@ class BookController extends Controller
         $resources = BookService::getPreparedBooksResources($prepared_books);
 
         return $resources;
+
+//        $authors = explode(',', $authors);
+//
+//        $books = \Yii::$app->db->createCommand(
+//            'SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
+//            FROM books
+//            JOIN authors ON books.author_id = authors.id
+//            WHERE LOWER(authors.name) LIKE :author
+//                AND title LIKE :title
+//                AND description LIKE :description'
+//        )->bindValues(['author' => '%' . $authors . '%', 'title' => '%' . strtolower($search) . '%', 'description' => '%' . $search . '%'])->queryAll();
+//
+//        return $books;
+
     }
 
     /**
      * Display information about the specific book
      * @param $id
      * @return BookResource
+     * @throws HttpException
      */
-//    public function actionView($id)
-//    {
-//        $book = $this->findBook($id);
-//
-//        if($book instanceof Book) {
-//            $resource = BookService::getPreparedBookResource($book);
-//        } else {
-//            throw new HttpException(500);
-//        }
-//
-//        return $resource;
-//    }
+    public function actionView($id)
+    {
+//        $book = \Yii::$app->db->createCommand('
+//        SELECT books.id, authors.name AS author_name, authors.id AS author_id, books.title, books.pages, books.language, books.genre, books.description
+//        FROM books
+//        JOIN authors ON books.author_id = authors.id
+//        WHERE books.id = :id')->bindValue(':id', $id)->queryOne();
+        $book = $this->findBook($id);
+
+        if($book instanceof Book) {
+            return BookService::getPreparedBookResource($book);
+        } else {
+            throw new HttpException(404);
+        }
+    }
 
     /**
      * Create new book
@@ -71,7 +141,6 @@ class BookController extends Controller
     public function actionCreate()
     {
         $book = new Book();
-
         $book->load(\Yii::$app->getRequest()->getBodyParams(), '');
         if ($book->save()) {
             return BookService::getPreparedBookResource($book);
@@ -125,6 +194,16 @@ class BookController extends Controller
         } else {
            throw new HttpException(404);
         }
+    }
+
+    public function actionLanguage()
+    {
+        return \Yii::$app->db->createCommand('SELECT DISTINCT language FROM books')->queryAll();
+    }
+
+    public function actionGenre()
+    {
+        return \Yii::$app->db->createCommand('SELECT DISTINCT genre FROM books')->queryAll();
     }
 
 }

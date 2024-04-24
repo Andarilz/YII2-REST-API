@@ -5,6 +5,7 @@ namespace app\services;
 
 use app\models\Book;
 use app\resources\BookResource;
+use yii\base\BaseObject;
 
 /**
  * BookService have methods for prepared book resources to add author field
@@ -43,4 +44,5 @@ class BookService
         $resource->setAuthor($book->author);
         return $resource;
     }
+
 }

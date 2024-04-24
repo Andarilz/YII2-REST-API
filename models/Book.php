@@ -35,19 +35,35 @@ class Book extends \yii\db\ActiveRecord
      * @param array|null $authors Array of authors ID's to filtering
      * @return \yii\db\ActiveQuery
      */
-    public static function search($search, $authors)
+    public static function search($search, $authors, $languages, $genre, $minPages, $maxPages)
     {
-        $query = static::find();
-        if ($search !== null) {
+        $query = static::find()->joinWith('author')->orderBy(['id' => SORT_ASC]);
+
+        if ($search  !== null) {
             $query->andFilterWhere(['or',
-                ['like', 'title', $search],
-                ['like', 'description', $search]
+                ['like', 'title', strtolower($search)],
+                ['like', 'description', $search],
+                ['like', 'authors.name', $search]
             ]);
         }
         if ($authors !== null) {
             if (is_array($authors)) {
                 $query->andFilterWhere(['in', 'author_id', $authors]);
             }
+        }
+        if ($languages !== null) {
+            if (is_array($languages)) {
+                $query->andFilterWhere(['in', 'language', $languages]);
+            }
+        }
+        if ($genre !== null) {
+                $query->andFilterWhere(['in', 'genre', $genre]);
+        }
+        if ($minPages !== null) {
+            $query->andWhere(['>=', 'pages', $minPages]);
+        }
+        if ($maxPages !== null) {
+            $query->andWhere(['<=', 'pages', $maxPages]);
         }
 
         return $query;
